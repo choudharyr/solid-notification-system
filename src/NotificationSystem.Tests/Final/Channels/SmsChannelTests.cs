@@ -8,12 +8,12 @@ namespace NotificationSystem.Tests.Final.Channels;
 public class SmsChannelTests
 {
     private readonly Mock<INotificationFormatter> _mockFormatter;
-    private readonly SmsChannel _channel;
+    private readonly NotificationSystem.Final.Channels.SmsChannel _channel;
 
     public SmsChannelTests()
     {
         _mockFormatter = new Mock<INotificationFormatter>();
-        _channel = new SmsChannel(_mockFormatter.Object, "test-api-key");
+        _channel = new NotificationSystem.Final.Channels.SmsChannel(_mockFormatter.Object, "test-api-key");
     }
 
     [Fact]

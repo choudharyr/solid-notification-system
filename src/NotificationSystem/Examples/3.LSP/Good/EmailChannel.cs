@@ -7,7 +7,7 @@ public class EmailChannel : NotificationChannel
         return base.ValidateRecipient(recipient) && recipient.Contains("@");
     }
 
-    protected override bool SendMessageCore(string message, string recipient)
+    protected override bool SendImplementation(string message, string recipient)
     {
         // Email sending implementation
         Console.WriteLine($"Sending email to {recipient}: {message}");

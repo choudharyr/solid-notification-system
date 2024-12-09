@@ -22,8 +22,8 @@ public static class NotificationServiceConfiguration
                 sp.GetRequiredService<INotificationFormatter>()
             ));
 
-        services.AddScoped<INotificationChannel, SmsChannel>(sp =>
-            new SmsChannel(
+        services.AddScoped<INotificationChannel, Channels.SmsChannel>(sp =>
+            new Channels.SmsChannel(
                 sp.GetRequiredService<INotificationFormatter>(),
                 configuration["Sms:ApiKey"]
             ));

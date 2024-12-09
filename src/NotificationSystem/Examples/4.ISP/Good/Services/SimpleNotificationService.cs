@@ -2,7 +2,7 @@
 
 namespace NotificationSystem.Examples.ISP.Good.Services;
 
-public class EmailService : IMessageSender
+public class SimpleNotificationService : IMessageSender
 {
     public void SendMessage(string message, string recipient)
     {

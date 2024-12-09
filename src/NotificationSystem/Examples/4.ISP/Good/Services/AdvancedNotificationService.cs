@@ -3,27 +3,26 @@
 namespace NotificationSystem.Examples.ISP.Good.Services;
 
 // Advanced email service implements multiple interfaces
-public class AdvancedEmailService : IMessageSender, IMessageValidator, IMessageEncryption
+public class AdvancedNotificationService : IMessageSender, IMessageScheduler, IMessageTracker
 {
     public void SendMessage(string message, string recipient)
     {
         Console.WriteLine($"Sending email to {recipient}: {message}");
     }
 
-    public void ValidateMessage(string message)
+    public void ScheduleMessage(string message, string recipient, DateTime scheduleTime)
     {
         if (string.IsNullOrEmpty(message))
             throw new ArgumentNullException(nameof(message));
     }
 
-    public void ValidateRecipient(string recipient)
+    public void CancelScheduledMessage(string messageId)
     {
-        if (!recipient.Contains("@"))
-            throw new ArgumentException("Invalid email address", nameof(recipient));
+        throw new NotImplementedException();
     }
 
-    public void EncryptMessage(string message)
+    public void TrackDeliveryStatus()
     {
-        Console.WriteLine("Encrypting message before sending");
+        throw new NotImplementedException();
     }
 }

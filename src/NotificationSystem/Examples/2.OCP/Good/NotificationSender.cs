@@ -8,13 +8,20 @@ namespace NotificationSystem.Examples.OCP.Good;
 /// - Closed for modification: Core notification logic doesn't need to change
 /// - Open for extension: New channels can be added by implementing INotificationChannel
 /// </summary>
-public class NotificationService
+public class NotificationSender
 {
     private readonly IEnumerable<INotificationChannel> _channels;
 
-    public NotificationService(IEnumerable<INotificationChannel> channels)
+    public NotificationSender(IEnumerable<INotificationChannel> channels)
     {
         _channels = channels ?? throw new ArgumentNullException(nameof(channels));
+    }
+
+    public void SendThroughAllChannels(string message, string recipient)
+    {
+        foreach (var channel in _channels) {
+            channel.SendNotification(message, recipient);
+        }
     }
 
     public void SendNotification(string message, string recipient, string channelName)

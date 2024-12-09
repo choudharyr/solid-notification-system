@@ -12,7 +12,7 @@ public abstract class NotificationChannel
         return !string.IsNullOrEmpty(recipient);
     }
 
-    protected abstract bool SendMessageCore(string message, string recipient);
+    protected abstract bool SendImplementation(string message, string recipient);
 
     public bool SendMessage(string message, string recipient)
     {
@@ -21,7 +21,7 @@ public abstract class NotificationChannel
         }
 
         try {
-            return SendMessageCore(message, recipient);
+            return SendImplementation(message, recipient);
         }
         catch {
             return false;

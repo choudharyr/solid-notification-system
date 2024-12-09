@@ -3,11 +3,11 @@
 namespace NotificationSystem.Examples.ISP.Good.Services;
 
 // Enterprise email service implements even more interfaces
-public class EnterpriseEmailService :
+public class EnterpriseNotificationService :
     IMessageSender,
     IMessageScheduler,
     IMessageTracker,
-    IMessageStore,
+    IMessageStorage,
     IReportGenerator
 {
     public void SendMessage(string message, string recipient)
@@ -25,18 +25,18 @@ public class EnterpriseEmailService :
         Console.WriteLine($"Cancelling scheduled email {messageId}");
     }
 
-    public void GetMessageStatus(string messageId)
+    public void TrackDeliveryStatus()
     {
-        Console.WriteLine($"Getting status for message {messageId}");
+        throw new NotImplementedException();
     }
 
-    public void StoreMessageHistory(string message, string recipient)
+    public void StoreMessageHistory()
     {
-        Console.WriteLine("Storing message in history");
+        throw new NotImplementedException();
     }
 
-    public void GenerateReport(DateTime startDate, DateTime endDate)
+    public void GenerateReport()
     {
-        Console.WriteLine($"Generating report from {startDate} to {endDate}");
+        throw new NotImplementedException();
     }
 }

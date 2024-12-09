@@ -1,6 +1,6 @@
 ﻿namespace NotificationSystem.Examples.ISP.Good.Interfaces;
 
-public interface IRetryPolicy
+public interface IMessageStorage
 {
-    void RetryFailedMessages();
+    void StoreMessageHistory();
 }

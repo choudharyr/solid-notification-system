@@ -2,5 +2,5 @@
 
 public interface IMessageTracker
 {
-    void GetMessageStatus(string messageId);
+    void TrackDeliveryStatus();
 }

@@ -12,7 +12,7 @@ public class SMSChannel : NotificationChannel
         return base.ValidateRecipient(recipient) && recipient.All(char.IsDigit);
     }
 
-    protected override bool SendMessageCore(string message, string recipient)
+    protected override bool SendImplementation(string message, string recipient)
     {
         // SMS sending implementation
         Console.WriteLine($"Sending SMS to {recipient}: {message}");

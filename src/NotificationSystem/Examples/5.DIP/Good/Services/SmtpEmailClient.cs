@@ -5,18 +5,15 @@ namespace NotificationSystem.Examples.DIP.Good.Services;
 
 public class SmtpEmailClient : IEmailClient
 {
-    private readonly string _smtpServer;
-    private readonly int _port;
+    private readonly SmtpClient _smtpClient;
 
     public SmtpEmailClient(string smtpServer, int port)
     {
-        _smtpServer = smtpServer;
-        _port = port;
+        _smtpClient = new SmtpClient(smtpServer, port);
     }
 
     public void SendEmail(string to, string subject, string message)
     {
-        using var client = new SmtpClient(_smtpServer, _port);
-        client.Send(new MailMessage("from@example.com", to, subject, message));
+        _smtpClient.Send(new MailMessage("from@example.com", to, subject, message));
     }
 }

@@ -5,28 +5,23 @@ namespace NotificationSystem.Examples.DIP.Good;
 public class EmailService
 {
     private readonly IEmailClient _emailClient;
-    private readonly IEmailRepository _emailRepository;
-    private readonly IEmailLogger _logger;
+    private readonly IEmailLogger _emailLogger;
 
     public EmailService(
         IEmailClient emailClient,
-        IEmailRepository emailRepository,
-        IEmailLogger logger)
+        IEmailLogger emailLogger)
     {
         _emailClient = emailClient ?? throw new ArgumentNullException(nameof(emailClient));
-        _emailRepository = emailRepository ?? throw new ArgumentNullException(nameof(emailRepository));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _emailLogger = emailLogger ?? throw new ArgumentNullException(nameof(emailLogger));
     }
 
     public void SendEmail(string to, string message)
     {
         try {
             _emailClient.SendEmail(to, "Notification", message);
-            _emailRepository.SaveEmailLog(to, message, DateTime.UtcNow);
-            _logger.Log($"Email sent to {to}: {message}");
+            _emailLogger.LogEmail(message, to);
         }
         catch (Exception ex) {
-            _logger.Log($"Error sending email: {ex.Message}");
             throw;
         }
     }

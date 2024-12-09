@@ -3,24 +3,23 @@ using NotificationSystem.Examples.DIP.Good.Interfaces;
 
 namespace NotificationSystem.Examples.DIP.Good.Services;
 
-public class SqlEmailRepository : IEmailRepository
+public class SqlEmailLogger : IEmailLogger
 {
     private readonly string _connectionString;
 
-    public SqlEmailRepository(string connectionString)
+    public SqlEmailLogger(string connectionString)
     {
         _connectionString = connectionString;
     }
 
-    public void SaveEmailLog(string to, string message, DateTime sentDate)
+    public void LogEmail(string message, string recipient)
     {
         using var connection = new SqlConnection(_connectionString);
         connection.Open();
         using var command = connection.CreateCommand();
-        command.CommandText = "INSERT INTO EmailLogs (To, Message, SentDate) VALUES (@to, @message, @date)";
-        command.Parameters.AddWithValue("@to", to);
+        command.CommandText = "INSERT INTO EmailLogs (To, Message) VALUES (@to, @message, @date)";
+        command.Parameters.AddWithValue("@to", recipient);
         command.Parameters.AddWithValue("@message", message);
-        command.Parameters.AddWithValue("@date", sentDate);
         command.ExecuteNonQuery();
     }
 }

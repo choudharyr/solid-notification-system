@@ -2,49 +2,34 @@
 
 public class NotificationService
 {
-    private readonly MessageValidator _validator;
-    private readonly MessageFormatter _formatter;
+    private readonly NotificationFormatter _formatter;
     private readonly NotificationLogger _logger;
-    private readonly UserPreferenceManager _preferenceManager;
     private readonly EmailSender _emailSender;
+    private readonly NotificationRepository _repository;
 
     public NotificationService(
-        MessageValidator validator,
-        MessageFormatter formatter,
+        NotificationFormatter formatter,
         NotificationLogger logger,
-        UserPreferenceManager preferenceManager,
-        EmailSender emailSender)
+        EmailSender emailSender,
+        NotificationRepository repository)
     {
-        _validator = validator;
-        _formatter = formatter;
-        _logger = logger;
-        _preferenceManager = preferenceManager;
-        _emailSender = emailSender;
+        _formatter = formatter ?? throw new ArgumentNullException(nameof(formatter));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _emailSender = emailSender ?? throw new ArgumentNullException(nameof(emailSender));
+        _repository = repository ?? throw new ArgumentNullException(nameof(repository));
     }
 
     public void SendNotification(string message, string recipient)
     {
         try {
-            // Validate
-            _validator.ValidateMessage(message, recipient);
-
-            // Check preferences
-            var preferences = _preferenceManager.GetUserPreferences(recipient);
-            if (!preferences.EmailNotificationsEnabled) {
-                _logger.LogMessage($"Notification not sent: User {recipient} has disabled email notifications");
-                return;
-            }
-
-            // Format and send
             var formattedMessage = _formatter.FormatMessage(message);
-            _emailSender.SendEmail(recipient, "New Notification", formattedMessage);
-
-            // Log success
-            _logger.LogMessage($"Notification sent successfully to {recipient}");
+            _logger.LogMessage(recipient, message);
+            _emailSender.SendEmail(recipient, "Notification", formattedMessage);
+            _repository.Store(recipient, message);
         }
         catch (Exception ex) {
-            _logger.LogMessage($"Error sending notification to {recipient}: {ex.Message}");
-            throw;
+            _logger.LogMessage(recipient, $"Error: {ex.Message}");  // Basic error logging
+            throw;  // Rethrow to maintain original behavior
         }
     }
 }

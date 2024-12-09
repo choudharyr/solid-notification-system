@@ -2,5 +2,5 @@
 
 public interface IReportGenerator
 {
-    void GenerateReport(DateTime startDate, DateTime endDate);
+    void GenerateReport();
 }

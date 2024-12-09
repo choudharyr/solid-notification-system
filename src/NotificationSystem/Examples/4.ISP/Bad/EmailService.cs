@@ -18,38 +18,20 @@ public class EmailService : INotificationService
         throw new NotImplementedException("Email service doesn't support scheduling");
     }
 
-    public void GetMessageStatus(string messageId)
+    public void TrackDeliveryStatus()
     {
         throw new NotImplementedException("Email service doesn't track status");
     }
 
-    public void StoreMessageHistory(string message, string recipient)
+    public void StoreMessageHistory()
     {
         throw new NotImplementedException("Email service doesn't store history");
     }
 
-    public void GenerateReport(DateTime startDate, DateTime endDate)
+    public void GenerateReport()
     {
         throw new NotImplementedException("Email service doesn't generate reports");
     }
 
-    public void ValidateMessage(string message)
-    {
-        throw new NotImplementedException("Email service doesn't validate messages");
-    }
-
-    public void ValidateRecipient(string recipient)
-    {
-        throw new NotImplementedException("Email service doesn't validate recipients");
-    }
-
-    public void EncryptMessage(string message)
-    {
-        throw new NotImplementedException("Email service doesn't encrypt messages");
-    }
-
-    public void RetryFailedMessages()
-    {
-        throw new NotImplementedException("Email service doesn't retry messages");
-    }
+    
 }

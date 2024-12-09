@@ -7,60 +7,84 @@ namespace NotificationSystem.Tests.DIP;
 public class EmailServiceTests
 {
     private readonly Mock<IEmailClient> _mockEmailClient;
-    private readonly Mock<IEmailRepository> _mockRepository;
-    private readonly Mock<IEmailLogger> _mockLogger;
+    private readonly Mock<IEmailLogger> _mockEmailLogger;
     private readonly EmailService _emailService;
 
     public EmailServiceTests()
     {
         _mockEmailClient = new Mock<IEmailClient>();
-        _mockRepository = new Mock<IEmailRepository>();
-        _mockLogger = new Mock<IEmailLogger>();
-
-        _emailService = new EmailService(
-            _mockEmailClient.Object,
-            _mockRepository.Object,
-            _mockLogger.Object);
+        _mockEmailLogger = new Mock<IEmailLogger>();
+        _emailService = new EmailService(_mockEmailClient.Object, _mockEmailLogger.Object);
     }
 
     [Fact]
-    public void SendEmail_Success_LogsAndSavesEmail()
+    public void Constructor_WithNullEmailClient_ThrowsArgumentNullException()
+    {
+        // Act & Assert
+        Assert.Throws<ArgumentNullException>(() =>
+            new EmailService(null!, _mockEmailLogger.Object));
+    }
+
+    [Fact]
+    public void Constructor_WithNullEmailLogger_ThrowsArgumentNullException()
+    {
+        // Act & Assert
+        Assert.Throws<ArgumentNullException>(() =>
+            new EmailService(_mockEmailClient.Object, null!));
+    }
+
+    [Fact]
+    public void SendEmail_CallsEmailClientAndLogger()
     {
         // Arrange
-        var to = "test@example.com";
         var message = "Test message";
+        var recipient = "test@example.com";
 
         // Act
-        _emailService.SendEmail(to, message);
+        _emailService.SendEmail(message, recipient);
 
         // Assert
-        _mockEmailClient.Verify(x =>
-            x.SendEmail(to, "Notification", message), Times.Once);
-
-        _mockRepository.Verify(x =>
-            x.SaveEmailLog(to, message, It.IsAny<DateTime>()), Times.Once);
-
-        _mockLogger.Verify(x =>
-            x.Log(It.Is<string>(s => s.Contains("sent"))), Times.Once);
+        _mockEmailClient.Verify(c =>
+            c.SendEmail(recipient, "Notification", message), Times.Once);
+        _mockEmailLogger.Verify(l =>
+            l.LogEmail(message, recipient), Times.Once);
     }
 
     [Fact]
-    public void SendEmail_WhenErrorOccurs_LogsErrorAndRethrows()
+    public void SendEmail_WhenEmailClientThrows_PropagatesException()
     {
         // Arrange
-        var to = "test@example.com";
         var message = "Test message";
+        var recipient = "test@example.com";
         var expectedException = new Exception("Test exception");
 
         _mockEmailClient
-            .Setup(x => x.SendEmail(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+            .Setup(c => c.SendEmail(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
             .Throws(expectedException);
 
         // Act & Assert
-        var exception = Assert.Throws<Exception>(() => _emailService.SendEmail(to, message));
-        Assert.Same(expectedException, exception);
+        var exception = Assert.Throws<Exception>(() =>
+            _emailService.SendEmail(message, recipient));
 
-        _mockLogger.Verify(x =>
-            x.Log(It.Is<string>(s => s.Contains("Error"))), Times.Once);
+        Assert.Same(expectedException, exception);
+    }
+
+    [Fact]
+    public void SendEmail_WhenLoggerThrows_PropagatesException()
+    {
+        // Arrange
+        var message = "Test message";
+        var recipient = "test@example.com";
+        var expectedException = new Exception("Test exception");
+
+        _mockEmailLogger
+            .Setup(l => l.LogEmail(It.IsAny<string>(), It.IsAny<string>()))
+            .Throws(expectedException);
+
+        // Act & Assert
+        var exception = Assert.Throws<Exception>(() =>
+            _emailService.SendEmail(message, recipient));
+
+        Assert.Same(expectedException, exception);
     }
 }

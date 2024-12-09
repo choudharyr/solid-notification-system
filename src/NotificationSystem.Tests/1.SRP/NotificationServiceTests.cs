@@ -1,114 +1,71 @@
-﻿
-using Moq;
+﻿using Moq;
 using NotificationSystem.Examples.SRP.Good;
-using NotificationSystem.Examples.SRP.Good.Models;
 
 namespace NotificationSystem.Tests.SRP;
 
 public class NotificationServiceTests
 {
-    private readonly Mock<MessageValidator> _mockValidator;
-    private readonly Mock<MessageFormatter> _mockFormatter;
+    private readonly Mock<NotificationFormatter> _mockFormatter;
     private readonly Mock<NotificationLogger> _mockLogger;
-    private readonly Mock<UserPreferenceManager> _mockPreferenceManager;
     private readonly Mock<EmailSender> _mockEmailSender;
+    private readonly Mock<NotificationRepository> _mockRepository;
     private readonly NotificationService _service;
 
     public NotificationServiceTests()
     {
-        _mockValidator = new Mock<MessageValidator>();
-        _mockFormatter = new Mock<MessageFormatter>();
-        _mockLogger = new Mock<NotificationLogger>("test.log");
-        _mockPreferenceManager = new Mock<UserPreferenceManager>();
-        _mockEmailSender = new Mock<EmailSender>("smtp.test.com", 587);
+        _mockFormatter = new Mock<NotificationFormatter>();
+        _mockLogger = new Mock<NotificationLogger>();
+        _mockEmailSender = new Mock<EmailSender>();
+        _mockRepository = new Mock<NotificationRepository>();
 
         _service = new NotificationService(
-            _mockValidator.Object,
             _mockFormatter.Object,
             _mockLogger.Object,
-            _mockPreferenceManager.Object,
-            _mockEmailSender.Object
+            _mockEmailSender.Object,
+            _mockRepository.Object
         );
     }
 
     [Fact]
-    public void SendNotification_WhenUserHasDisabledNotifications_DoesNotSendEmail()
+    public void SendNotification_ShouldCoordinateAllOperations()
     {
         // Arrange
         var message = "Test message";
         var recipient = "test@example.com";
-        var preferences = new UserPreferences { EmailNotificationsEnabled = false };
+        var formattedMessage = "[Formatted] Test message";
 
-        _mockPreferenceManager
-            .Setup(x => x.GetUserPreferences(recipient))
-            .Returns(preferences);
-
-        // Act
-        _service.SendNotification(message, recipient);
-
-        // Assert
-        _mockEmailSender.Verify(
-            x => x.SendEmail(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()),
-            Times.Never
-        );
-        _mockLogger.Verify(
-            x => x.LogMessage(It.Is<string>(msg => msg.Contains("disabled email notifications"))),
-            Times.Once
-        );
-    }
-
-    [Fact]
-    public void SendNotification_WhenUserHasEnabledNotifications_SendsEmail()
-    {
-        // Arrange
-        var message = "Test message";
-        var recipient = "test@example.com";
-        var formattedMessage = "Formatted message";
-        var preferences = new UserPreferences { EmailNotificationsEnabled = true };
-
-        _mockPreferenceManager
-            .Setup(x => x.GetUserPreferences(recipient))
-            .Returns(preferences);
         _mockFormatter
-            .Setup(x => x.FormatMessage(message))
+            .Setup(f => f.FormatMessage(message))
             .Returns(formattedMessage);
 
         // Act
         _service.SendNotification(message, recipient);
 
         // Assert
-        _mockEmailSender.Verify(
-            x => x.SendEmail(recipient, "New Notification", formattedMessage),
-            Times.Once
-        );
-        _mockLogger.Verify(
-            x => x.LogMessage(It.Is<string>(msg => msg.Contains("successfully"))),
-            Times.Once
-        );
+        _mockFormatter.Verify(f => f.FormatMessage(message), Times.Once);
+        _mockLogger.Verify(l => l.LogMessage(recipient, message), Times.Once);
+        _mockEmailSender.Verify(e => e.SendEmail(recipient, "Notification", formattedMessage), Times.Once);
+        _mockRepository.Verify(r => r.Store(recipient, message), Times.Once);
     }
 
     [Fact]
-    public void SendNotification_WhenExceptionOccurs_LogsErrorAndRethrows()
+    public void SendNotification_WhenErrorOccurs_ShouldLogAndRethrow()
     {
         // Arrange
         var message = "Test message";
         var recipient = "test@example.com";
-        var preferences = new UserPreferences { EmailNotificationsEnabled = true };
         var expectedException = new Exception("Test exception");
 
-        _mockPreferenceManager
-            .Setup(x => x.GetUserPreferences(recipient))
-            .Returns(preferences);
         _mockEmailSender
-            .Setup(x => x.SendEmail(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+            .Setup(e => e.SendEmail(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
             .Throws(expectedException);
 
         // Act & Assert
-        var exception = Assert.Throws<Exception>(() => _service.SendNotification(message, recipient));
+        var exception = Assert.Throws<Exception>(() =>
+            _service.SendNotification(message, recipient));
+
         Assert.Same(expectedException, exception);
-        _mockLogger.Verify(
-            x => x.LogMessage(It.Is<string>(msg => msg.Contains("Error") && msg.Contains(expectedException.Message))),
-            Times.Once
-        );
+        _mockLogger.Verify(l =>
+            l.LogMessage(recipient, It.Is<string>(s => s.Contains("Error"))), Times.Once);
     }
 }

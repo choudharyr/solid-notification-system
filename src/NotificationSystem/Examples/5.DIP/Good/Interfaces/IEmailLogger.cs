@@ -2,5 +2,5 @@
 
 public interface IEmailLogger
 {
-    void Log(string message);
+    void LogEmail(string message, string recipient);
 }
